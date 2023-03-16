@@ -11,7 +11,7 @@ This chart is tested with k8s 1.21+ and helm 3.6.0+.
 
 # Installation
 
-This chart is [released as an OCI image](https://helm.sh/docs/topics/registries/) to `ghcr.io/mastodon/chart`. You can install it without the need to add any repository to your helm installation using:
+This chart is [released as an OCI image](https://helm.sh/docs/topics/registries/) to `ghcr.io/mastodon/charts/mastodon`. You can install it without the need to add any repository to your helm installation using:
 
 ```shell
 helm install mastodon oci://ghcr.io/mastodon/charts/mastodon --values your-values-file.yaml
