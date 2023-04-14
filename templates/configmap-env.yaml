@@ -328,3 +328,6 @@ data:
   {{- with .Values.mastodon.metrics.statsd.address }}
   STATSD_ADDR: {{ . }}
   {{- end }}
+  {{- range $key, $value := .Values.mastodon.extraEnv }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
