@@ -65,8 +65,10 @@ spec:
       {{- end }}
       containers:
         - name: {{ $context.Chart.Name }}
+          {{- with $context.Values.mastodon.sidekiq.securityContext | default $context.Values.securityContext }}
           securityContext:
-            {{- toYaml $context.Values.mastodon.sidekiq.securityContext | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           image: "{{ $context.Values.image.repository }}:{{ $context.Values.image.tag | default $context.Chart.AppVersion }}"
           imagePullPolicy: {{ $context.Values.image.pullPolicy }}
           command:
