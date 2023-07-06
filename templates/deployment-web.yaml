@@ -37,15 +37,18 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if (not .Values.mastodon.s3.enabled) }}
       volumes:
+        {{- with .Values.mastodon.web.extraVolumes }}
+        {{- . | toYaml | nindent 8 }}
+        {{- end }}
+        {{- if (not .Values.mastodon.s3.enabled) }}
         - name: assets
           persistentVolumeClaim:
             claimName: {{ template "mastodon.fullname" . }}-assets
         - name: system
           persistentVolumeClaim:
             claimName: {{ template "mastodon.fullname" . }}-system
-      {{- end }}
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}-web
           {{- with (default .Values.securityContext .Values.mastodon.web.securityContext) }}
@@ -106,13 +109,16 @@ spec:
                   name: {{ .Values.mastodon.s3.existingSecret }}
                   key: AWS_ACCESS_KEY_ID
             {{- end }}
-          {{- if (not .Values.mastodon.s3.enabled) }}
           volumeMounts:
+            {{- with .Values.mastodon.web.extraVolumeMounts }}
+            {{- . | toYaml | nindent 12 }}
+            {{- end }}
+            {{- if (not .Values.mastodon.s3.enabled) }}
             - name: assets
               mountPath: /opt/mastodon/public/assets
             - name: system
               mountPath: /opt/mastodon/public/system
-          {{- end }}
+            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.mastodon.web.port }}

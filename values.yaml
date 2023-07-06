@@ -191,6 +191,9 @@ mastodon:
     # requests:
     #   cpu: 250m
     #   memory: 768Mi
+
+    extraVolumes: []
+    extraVolumeMounts: []
     # -- Puma-specific options. Below values are based on default behavior in
     # config/puma.rb when no custom values are provided.
     minThreads: "5"
