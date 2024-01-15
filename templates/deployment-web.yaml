@@ -55,8 +55,18 @@ spec:
           configMap:
             name: {{ .Values.mastodon.web.customDatabaseConfigYml.configMapRef.name }}
       {{- end }}
+      {{- if .Values.mastodon.beyla.enabled }}
+        - name: beyla-config
+          configMap:
+            name: {{ include "mastodon.fullname" . }}-beyla
+      {{- end }}
       {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.mastodon.beyla.enabled }}
+      # Beyla sidecar needs to share the process namespace.
+      # How this interacts with the statsd sidecar is untested.
+      shareProcessNamespace: true
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}-web
@@ -189,6 +199,28 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+        {{- if .Values.mastodon.beyla.enabled }}
+        - name: beyla
+          image: "{{ .Values.mastodon.beyla.image.repository }}:{{ .Values.mastodon.beyla.image.tag }}"
+          imagePullPolicy: {{ .Values.mastodon.beyla.image.pullPolicy }}
+          args:
+            - /beyla
+            - -config=/config/beyla.yaml
+          securityContext: # Privileges are required to install the eBPF probes
+            privileged: true
+            runAsUser: 0
+            capabilities:
+              add:
+                - SYS_ADMIN
+          env:
+          {{- range $k, $v := .Values.mastodon.beyla.env }}
+            - name: {{ $k }}
+              value: {{ (tpl $v $) | quote }}
+          {{- end }}
+          volumeMounts:
+            - name: beyla-config
+              mountPath: /config
+        {{- end }}
         {{- include "mastodon.statsdExporterContainer" $ | indent 8 }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

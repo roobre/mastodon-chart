@@ -1,0 +1,11 @@
+{{- if and .Values.mastodon.beyla.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "mastodon.fullname" . }}-beyla
+  labels:
+    {{- include "mastodon.labels" . | nindent 4 }}
+data:
+  beyla.yaml: |
+    {{- .Values.mastodon.beyla.config | toYaml | nindent 4 }}
+{{- end }}
