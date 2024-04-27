@@ -81,6 +81,27 @@ spec:
       {{- with $context.Values.volumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if $context.Values.volumeMounts }}
+      initContainers:
+        - name: volume-chown
+          image: "{{ coalesce (dig "image" "repository" false .) $context.Values.image.repository }}:{{ coalesce (dig "image" "tag" false .) $context.Values.image.tag $context.Chart.AppVersion }}"
+          imagePullPolicy: {{ $context.Values.image.pullPolicy }}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -ex
+              {{- range $context.Values.volumeMounts }}
+              chmod 770 {{ .mountPath | quote }}
+              {{- end }}
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+          volumeMounts:
+          {{- with $context.Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- end }}
       containers:
         - name: {{ $context.Chart.Name }}
           securityContext:
