@@ -278,6 +278,199 @@ mastodon:
         enabled: false
         port: 9102
 
+  # Enable Grafana Beyla autoinstrumentation using a sidecar.
+  # https://grafana.com/docs/beyla/latest/setup/kubernetes/
+  beyla:
+    enabled: false
+    image:
+      repository: grafana/beyla
+      tag: "1.0.2"
+      pullPolicy: IfNotPresent
+    env:
+      # Values here will be evaluated as templates.
+      BEYLA_OPEN_PORT: '{{ .Values.mastodon.web.port }}'
+    config:
+      # Values here will _not_ be evaluated as templates.
+      otel_metrics_export:
+        interval: 60s
+        buckets:
+          duration_histogram: [0.05, 0.1, 0.25, 0.5, 0.75, 1, 2, 5]
+          request_size_histogram: [0]
+      routes:
+        ignore_mode: all
+        ignored_patterns:
+          - /health
+        patterns:
+          - /
+          - /inbox
+          - /media_attachments
+          # Asked chatgpt to produce this list from:
+          # https://github.com/mastodon/mastodon/blob/e621c1c44c49dbed58e6961ad868d356f0534490/config/routes/api.rb
+          - /api/oembed
+          - /api/v1/accounts/familiar_followers
+          - /api/v1/accounts/*
+          - /api/v1/accounts/*/block
+          - /api/v1/accounts/*/follow
+          - /api/v1/accounts/*/mute
+          - /api/v1/accounts/*/note
+          - /api/v1/accounts/*/pin
+          - /api/v1/accounts/*/remove_from_followers
+          - /api/v1/accounts/*/unblock
+          - /api/v1/accounts/*/unfollow
+          - /api/v1/accounts/*/unmute
+          - /api/v1/accounts/lookup
+          - /api/v1/accounts/relationships
+          - /api/v1/accounts/search
+          - /api/v1/accounts/unpin
+          - /api/v1/accounts/update_credentials
+          - /api/v1/accounts/verify_credentials
+          - /api/v1/admin/accounts
+          - /api/v1/admin/accounts/*/action
+          - /api/v1/admin/accounts/*/approve
+          - /api/v1/admin/accounts/*/enable
+          - /api/v1/admin/accounts/*/reject
+          - /api/v1/admin/accounts/*/unsensitive
+          - /api/v1/admin/accounts/*/unsilence
+          - /api/v1/admin/accounts/*/unsuspend
+          - /api/v1/admin/canonical_email_blocks
+          - /api/v1/admin/canonical_email_blocks/*
+          - /api/v1/admin/dimensions
+          - /api/v1/admin/domain_allows
+          - /api/v1/admin/domain_allows/*
+          - /api/v1/admin/domain_blocks
+          - /api/v1/admin/domain_blocks/*
+          - /api/v1/admin/email_domain_blocks
+          - /api/v1/admin/email_domain_blocks/*
+          - /api/v1/admin/ip_blocks
+          - /api/v1/admin/ip_blocks/*
+          - /api/v1/admin/measures
+          - /api/v1/admin/reports
+          - /api/v1/admin/reports/*/assign_to_self
+          - /api/v1/admin/reports/*/reopen
+          - /api/v1/admin/reports/*/resolve
+          - /api/v1/admin/reports/*/unassign
+          - /api/v1/admin/retention
+          - /api/v1/admin/tags
+          - /api/v1/admin/tags/*
+          - /api/v1/admin/trends/links
+          - /api/v1/admin/trends/links/*/approve
+          - /api/v1/admin/trends/links/*/reject
+          - /api/v1/admin/trends/links/publishers
+          - /api/v1/admin/trends/links/publishers/*/approve
+          - /api/v1/admin/trends/links/publishers/*/reject
+          - /api/v1/admin/trends/statuses
+          - /api/v1/admin/trends/statuses/*/approve
+          - /api/v1/admin/trends/statuses/*/reject
+          - /api/v1/admin/trends/tags
+          - /api/v1/admin/trends/tags/*/approve
+          - /api/v1/admin/trends/tags/*/reject
+          - /api/v1/announcements
+          - /api/v1/announcements/*/dismiss
+          - /api/v1/announcements/*/reactions
+          - /api/v1/apps
+          - /api/v1/apps/verify_credentials
+          - /api/v1/blocks
+          - /api/v1/bookmarks
+          - /api/v1/conversations
+          - /api/v1/conversations/*
+          - /api/v1/conversations/*/read
+          - /api/v1/conversations/*/unread
+          - /api/v1/custom_emojis
+          - /api/v1/directory
+          - /api/v1/domain_blocks
+          - /api/v1/emails/check_confirmation
+          - /api/v1/emails/confirmations
+          - /api/v1/endorsements
+          - /api/v1/favourites
+          - /api/v1/featured_tags
+          - /api/v1/featured_tags/*
+          - /api/v1/featured_tags/suggestions
+          - /api/v1/filters
+          - /api/v1/filters/*
+          - /api/v1/followed_tags
+          - /api/v1/follow_requests
+          - /api/v1/follow_requests/*/authorize
+          - /api/v1/follow_requests/*/reject
+          - /api/v1/instance
+          - /api/v1/instance/activity
+          - /api/v1/instance/domain_blocks
+          - /api/v1/instance/extended_description
+          - /api/v1/instance/languages
+          - /api/v1/instance/peers
+          - /api/v1/instance/privacy_policy
+          - /api/v1/instance/rules
+          - /api/v1/instance/translation_languages
+          - /api/v1/lists
+          - /api/v1/lists/*
+          - /api/v1/lists/*/accounts
+          - /api/v1/lists/*/accounts/*
+          - /api/v1/markers
+          - /api/v1/markers/*
+          - /api/v1/media
+          - /api/v1/media/*
+          - /api/v1/mutes
+          - /api/v1/notifications
+          - /api/v1/notifications/clear
+          - /api/v1/notifications/*
+          - /api/v1/notifications/*/dismiss
+          - /api/v1/peers/search
+          - /api/v1/polls
+          - /api/v1/polls/*
+          - /api/v1/polls/*/votes
+          - /api/v1/preferences
+          - /api/v1/profile/avatar
+          - /api/v1/profile/header
+          - /api/v1/push/subscription
+          - /api/v1/reports
+          - /api/v1/scheduled_statuses
+          - /api/v1/scheduled_statuses/*
+          - /api/v1/statuses
+          - /api/v1/statuses/*
+          - /api/v1/statuses/*/bookmark
+          - /api/v1/statuses/*/context
+          - /api/v1/statuses/*/favourite
+          - /api/v1/statuses/*/mute
+          - /api/v1/statuses/*/pin
+          - /api/v1/statuses/*/reblog
+          - /api/v1/statuses/*/translate
+          - /api/v1/statuses/*/unbookmark
+          - /api/v1/statuses/*/unfavourite
+          - /api/v1/statuses/*/unmute
+          - /api/v1/statuses/*/unpin
+          - /api/v1/statuses/*/unreblog
+          - /api/v1/streaming
+          - /api/v1/streaming/(*any)
+          - /api/v1/suggestions
+          - /api/v1/suggestions/*
+          - /api/v1/tags/*
+          - /api/v1/tags/*/follow
+          - /api/v1/tags/*/unfollow
+          - /api/v1/timelines/home
+          - /api/v1/timelines/list/*
+          - /api/v1/timelines/public
+          - /api/v1/timelines/tag/*
+          - /api/v1/trends
+          - /api/v1/trends/links
+          - /api/v1/trends/statuses
+          - /api/v1/trends/tags
+          - /api/v2/admin/accounts
+          - /api/v2/filters
+          - /api/v2/filters/*/keywords
+          - /api/v2/filters/*/statuses
+          - /api/v2/filters/*
+          - /api/v2/filters/keywords
+          - /api/v2/filters/keywords/*
+          - /api/v2/filters/statuses
+          - /api/v2/filters/statuses/*
+          - /api/v2/instance
+          - /api/v2/media
+          - /api/v2/search
+          - /api/v2/suggestions
+          - /api/web/embeds
+          - /api/web/push_subscriptions
+          - /api/web/push_subscriptions/*
+          - /api/web/settings
+  postgresql:
   # Sets the PREPARED_STATEMENTS environment variable: https://docs.joinmastodon.org/admin/config/#prepared_statements
   preparedStatements: true
 
