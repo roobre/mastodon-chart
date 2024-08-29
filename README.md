@@ -1,3 +1,7 @@
+# ⚠️ Archival notice
+
+I no longer maintain this fork. Over time, my patches and approach have diverged too much from upstream's, and I have decided to go for an ad-hoc chart/kustomization specifically for my instance instead of reusing a common one.
+
 # Introduction
 
 This is a [Helm](https://helm.sh/) chart for installing Mastodon into a
